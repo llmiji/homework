@@ -29,3 +29,6 @@ for tr in trs:
     }
 
     db.genie.insert_one(doc)
+
+    # 숙제 끝, github 히스토리 생성용 주석 달기
+    
