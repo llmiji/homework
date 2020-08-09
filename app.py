@@ -41,7 +41,7 @@ def view_orders():
     return jsonify({'result': 'success', 'orders': orders})
 
 
-
+# 숙제 완료 히스토리 생성 위한 주석처리
 
 if __name__ == '__main__':
     app.run('localhost', port=5000, debug=True)
