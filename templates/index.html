@@ -48,6 +48,7 @@
 
         .order_box {
             width: 550px;
+            margin-bottom: 20px;
         }
 
         .mybtn {
@@ -60,47 +61,83 @@
             margin: auto;
             width: 550px;
         }
-        .rate{
+
+        .rate {
             color: blue;
         }
     </style>
     <script>
         $(document).ready(function () {
             $.ajax({
-  type: "GET",
-  url: " https://api.manana.kr/exchange/rate.json",
-  data: {},
-  success: function(response){
-      console.log(response)
-    let nowRate = response[1]['rate'];
-    $('#rate-box').text(nowRate);
+                type: "GET",
+                url: " https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    console.log(response)
+                    let nowRate = response[1]['rate'];
+                    $('#rate-box').text(nowRate);
 
-  }
-})
-        // 여기에 환율 API Ajax 요청을 하면 되겠죠?
+                }
+            })
+            order_listing();
+            // 여기에 환율 API Ajax 요청을 하면 되겠죠?
         });
- function order() {
-            let  name = $('#order-name').val()
-            let  count = $('#order-count').val()
-            let  address = $('#order-address').val()
-            let  phone = $('#order-phone').val()
+
+        function order_listing() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let orders = response['orders'];
+                    for (let i = 0, i < orders.length; i++)  {
+                        let name = orders[i][name];
+                        let count = orders[i][count];
+                        let address = orders[i][address];
+                        let phone = orders[i][phone];
+
+                        let temp_html = `<tr >
+                        < th scope = "row" >${name}</th>
+                            <td>${count}</td>
+                            <td>${address}</td>
+                            <td> ${phone} </td>
+                            </tr>`
+                        $(#order-list-box).append(temp_html)
+                    }
+
+                }
+            })
+
+        }
+
+        function order() {
+            let name = $('#order-name').val()
+            let count = $('#order-count').val()
+            let address = $('#order-address').val()
+            let phone = $('#order-phone').val()
 
             if (name == '') {
                 alert('이름을 입력하세요');
-              }
-              else if (count == '-- 수량을 선택 하세요 --'){
+            } else if (count == '-- 수량을 선택 하세요 --') {
                 alert('수량을 선택하세요');
-             }
-             else if (address == ''){
+            } else if (address == '') {
                 alert('주소를 입력하세요');
-             }
-             else if (phone == ''){
+            } else if (phone == '') {
                 alert('전화번호를 입력하세요');
-             }
-             else {
-                alert('주문이 완료되었습니다.')
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {'name_give': name, 'count_give': count, 'address_give': address, 'phone_give': phone},
+                    success: function (response) {
+                        if (response["result"] == "success") {
+                            alert(response["msg"]);
+                            window.location.reload();
+                        }
+                    }
+                })
             }
-}
+        }
     </script>
 </head>
 
@@ -110,20 +147,21 @@
     <div class="desc">
         <h1> 양초를 팝니다 <span class="price">가격:3,000원</span></h1>
         <p>이 양초는 특별한 힘을 가지고 있습니다. 하나 두개 켜 놓으면 또 다른 촛불을 찾을 수 있죠</p>
-        <p class="rate">달러-원 환율: <span id = "rate-box" 1000></span></p>
+        <p class="rate">달러-원 환율: <span id="rate-box" 1000></span></p>
     </div>
     <div class="order_box">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup-sizing-default">주문자이름</span>
             </div>
-            <input id="order-name" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+            <input id="order-name" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
         </div>
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="inputGroupSelect01">수량</label>
             </div>
-            <select  id="order-count" class="custom-select" >
+            <select id="order-count" class="custom-select">
                 <option selected>-- 수량을 선택 하세요 --</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -134,16 +172,31 @@
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup-sizing-default">주소</span>
             </div>
-            <input  id="order-address" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+            <input id="order-address" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
         </div>
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup-sizing-default">전화번호</span>
             </div>
-            <input  id="order-phone"  type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+            <input id="order-phone" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
         </div>
         <button onclick="order()" class="btn btn-primary mybtn">주문하기</button>
     </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">이름</th>
+            <th scope="col">수량</th>
+            <th scope="col">주소</th>
+            <th scope="col">전화번호</th>
+        </tr>
+        </thead>
+        <tbody id="order-list-box">
+
+        </tbody>
+    </table>
 </div>
 </body>
 
